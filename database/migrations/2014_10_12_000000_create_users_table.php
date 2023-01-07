@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('account_name');
             $table->string('avator')->nullable();
+            $table->string('profile_background')->nullable();
             $table->text('introduction')->nullable();
             $table->date('birthday')->nullable();
             $table->string('web')->nullable();

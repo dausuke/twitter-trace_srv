@@ -19,8 +19,14 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'account_name',
         'email',
         'password',
+        'web',
+        'birthday',
+        'introduction',
+        'profile_background',
+        'avator'
     ];
 
     /**
@@ -41,4 +47,51 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    protected $appends = ['follow_count', 'follower_count'];
+
+    public function tweets()
+    {
+        return $this->hasMany(Tweet::class);
+    }
+
+    public function follows()
+    {
+        return $this->belongsToMany(User::class, 'follow_users', 'follower_id', 'user_id')
+            ->using(FollowUser::class)
+            ->withTimestamps();
+    }
+
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'follow_users', 'user_id', 'follower_id')
+            ->using(FollowUser::class)
+            ->withTimestamps();
+    }
+
+    public function likes()
+    {
+        return $this->belongsToMany(Tweet::class, 'likes')->using(Like::class);
+            
+    }
+
+    public function reTweets()
+    {
+        return $this->belongsToMany(Tweet::class, 'retweets')->using(Like::class);
+    }
+
+    public function getFollowCountAttribute()
+    {
+        return $this->follows()->count();
+    }
+
+    public function getFollowerCountAttribute()
+    {
+        return $this->followers()->count();
+    }
+
+    public function getAvatarAttribute($data)
+    {
+        return $data ? Storage::url("users/avatar/{$data}") : null;
+    }
 }
