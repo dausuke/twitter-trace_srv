@@ -20,7 +20,7 @@ class TweetFactory extends Factory
     {
         return [
             'user_id' => 1,
-            'body' => fake()->realTextBetween(10, 1000),
+            'body' => fake()->realTextBetween(10, 50, 5),
         ];
     }
 }

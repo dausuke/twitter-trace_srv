@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/health/check', function () {
+    return response('Success', 200)
+        ->header('Content-Type', 'text/plain');
 });
