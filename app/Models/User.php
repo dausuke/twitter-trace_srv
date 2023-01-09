@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Storage;
 
 class User extends Authenticatable
 {
@@ -26,7 +27,8 @@ class User extends Authenticatable
         'birthday',
         'introduction',
         'profile_background',
-        'avator'
+        'avator',
+        'email_verified_at'
     ];
 
     /**
@@ -72,7 +74,6 @@ class User extends Authenticatable
     public function likes()
     {
         return $this->belongsToMany(Tweet::class, 'likes')->using(Like::class);
-            
     }
 
     public function reTweets()
@@ -90,8 +91,9 @@ class User extends Authenticatable
         return $this->followers()->count();
     }
 
-    public function getAvatarAttribute($data)
+    public function getAvatorAttribute($data)
     {
+        if (strpos($data, 'https://') !== false) return $data;
         return $data ? Storage::url("users/avatar/{$data}") : null;
     }
 }
