@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\TweetController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,4 +28,14 @@ Route::controller(AuthController::class)->group(function () {
 
 Route::controller(TweetController::class)->group(function () {
     Route::get('tweet', 'index');
+});
+
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::controller(UserController::class)->group(function () {
+        Route::get('users', 'index');
+    });
+
+    Route::controller(TweetController::class)->group(function () {
+        Route::post('tweet/create', 'create');
+    });
 });

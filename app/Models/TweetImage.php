@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Storage;
 
 class TweetImage extends Model
 {
@@ -13,4 +14,10 @@ class TweetImage extends Model
         'tweet_id',
         'image',
     ];
+
+    public function getImageAttribute($data)
+    {
+        if (strpos($data, 'https://') !== false) return $data;
+        return $data ? Storage::url("tweets/images/{$data}") : null;
+    }
 }
