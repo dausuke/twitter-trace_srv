@@ -24,6 +24,7 @@ use App\Http\Controllers\UserController;
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('register', 'register');
+    Route::post('login', 'login');
 });
 
 Route::controller(TweetController::class)->group(function () {
