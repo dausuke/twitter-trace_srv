@@ -15,9 +15,18 @@ class Tweet extends Model
         'body',
     ];
 
-    protected $appends = ['comments'];
+    protected $appends = [
+        'comments',
+        'like_count',
+        'retweet_count',
+        'comment_count',
+        'is_liked',
+        'is_retweeted',
+        'is_commented'
+    ];
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 
@@ -33,11 +42,44 @@ class Tweet extends Model
 
     public function reTweetUsers()
     {
-        return $this->belongsToMany(User::class, 'retweets')->using(Like::class);
+        return $this->belongsToMany(User::class, 'retweets')->using(Retweet::class);
     }
 
     public function getCommentsAttribute()
     {
         return $this->where('id', 'comment_to')->get();
+    }
+
+    public function getLikeCountAttribute()
+    {
+        return $this->likeUsers()->count();
+    }
+
+    public function getRetweetCountAttribute()
+    {
+        return $this->reTweetUsers()->count();
+    }
+
+    public function getCommentCountAttribute()
+    {
+        return $this->where('id', 'comment_to')->count();
+    }
+
+    public function getIsLikedAttribute()
+    {
+        $user_id = auth()->id();
+        return $this->likeUsers()->exists('user_id', $user_id);
+    }
+
+    public function getIsRetweetedAttribute()
+    {
+        $user_id = auth()->id();
+        return $this->reTweetUsers()->exists('user_id', $user_id);
+    }
+
+    public function getIsCommentedAttribute()
+    {
+        $user_id = auth()->id();
+        return $this->where('id', 'comment_to')->exists('user_id', $user_id);
     }
 }

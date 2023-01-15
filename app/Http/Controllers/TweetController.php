@@ -41,7 +41,7 @@ class TweetController extends Controller
             $tweet = $user->tweets()->create($data);
 
             if ($request->has('images')) {
-                $path = 'public/tweets/images';
+                $path = 'tweets/images';
 
                 foreach ($request->images as $request_image) {
                     $image = Image::make($request_image)->orientate()->encode('png');
@@ -57,6 +57,26 @@ class TweetController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
+            Logger($e);
+            abort(404);
+        }
+    }
+
+    function likeTweet(Tweet $tweet)
+    {
+        try {
+            $user_id = auth()->id();
+
+            $is_like = $tweet->likeUsers()->where('user_id', $user_id)->exists();
+
+            $is_like
+                ? $tweet->likeUsers()->detach($user_id)
+                : $tweet->likeUsers()->attach($user_id);
+
+            $response = Tweet::latest()->with('user', 'images')->get();
+
+            return response()->json($response, 200);
+        } catch (\Exception $e) {
             Logger($e);
             abort(404);
         }
