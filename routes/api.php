@@ -39,5 +39,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::controller(TweetController::class)->group(function () {
         Route::post('tweet/create', 'create');
         Route::post('tweet/{tweet}/like',  'likeTweet');
+        Route::post('tweet/{tweet}/retweet',  'retweet');
     });
 });

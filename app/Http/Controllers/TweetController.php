@@ -81,4 +81,24 @@ class TweetController extends Controller
             abort(404);
         }
     }
+
+    function retweet(Tweet $tweet)
+    {
+        try {
+            $user_id = auth()->id();
+
+            $is_like = $tweet->reTweetUsers()->where('user_id', $user_id)->exists();
+
+            $is_like
+                ? $tweet->reTweetUsers()->detach($user_id)
+                : $tweet->reTweetUsers()->attach($user_id);
+
+            $response = Tweet::latest()->with('user', 'images')->get();
+
+            return response()->json($response, 200);
+        } catch (\Exception $e) {
+            Logger($e);
+            abort(404);
+        }
+    }
 }
