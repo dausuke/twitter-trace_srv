@@ -16,14 +16,21 @@ class Tweet extends Model
     ];
 
     protected $appends = [
-        'comments',
         'like_count',
         'retweet_count',
-        'comment_count',
         'is_liked',
         'is_retweeted',
-        'is_commented'
     ];
+
+    public function scopeAllTweet($query)
+    {
+        return $query->whereNull('comment_to')->latest()->with('user', 'images');
+    }
+
+    public function scopeComments($query, $id)
+    {
+        return $query->where('comment_to', $id)->latest()->with('user', 'images');
+    }
 
     public function user()
     {
@@ -45,11 +52,6 @@ class Tweet extends Model
         return $this->belongsToMany(User::class, 'retweets')->using(Retweet::class);
     }
 
-    public function getCommentsAttribute()
-    {
-        return $this->where('id', 'comment_to')->get();
-    }
-
     public function getLikeCountAttribute()
     {
         return $this->likeUsers()->count();
@@ -58,11 +60,6 @@ class Tweet extends Model
     public function getRetweetCountAttribute()
     {
         return $this->reTweetUsers()->count();
-    }
-
-    public function getCommentCountAttribute()
-    {
-        return $this->where('id', 'comment_to')->count();
     }
 
     public function getIsLikedAttribute()
@@ -77,9 +74,41 @@ class Tweet extends Model
         return $this->reTweetUsers()->exists('user_id', $user_id);
     }
 
-    public function getIsCommentedAttribute()
+    public static function getAllTweetWithComment()
+    {
+        $tweets = (new self)->allTweet()->get();
+
+        return $tweets->each(function ($tweet) {
+            return (new self)->getCommentStatus($tweet);
+        });
+    }
+
+    public function getCommentStatus($tweet)
+    {
+        $tweet->comments = $this->_getComments($tweet->id);
+        $tweet->comment_count = $this->_getCommentCount($tweet->id);
+        $tweet->is_commented = $this->_getIsCommented($tweet->id);
+
+        return $tweet;
+    }
+
+    private function _getComments($id)
+    {
+        $comment = $this->comments($id)->get();
+
+        return $comment->each(function ($tweet) {
+            return $this->getCommentStatus($tweet);
+        });
+    }
+
+    private function _getCommentCount($id)
+    {
+        return $this->comments($id)->count();
+    }
+
+    private function _getIsCommented($id)
     {
         $user_id = auth()->id();
-        return $this->where('id', 'comment_to')->exists('user_id', $user_id);
+        return $this->comments($id)->exists('user_id', $user_id);
     }
 }

@@ -14,14 +14,13 @@ class TweetController extends Controller
     function index()
     {
         try {
-            $response = Tweet::latest()->with('user', 'images')->get();
+            $response = Tweet::getAllTweetWithComment();
             return response()->json($response, 200);
         } catch (\Exception $e) {
             Logger($e);
             abort(404);
         }
     }
-
 
     function create(Request $request)
     {
@@ -62,6 +61,14 @@ class TweetController extends Controller
         }
     }
 
+    function show(Tweet $tweet)
+    {
+        $response = $tweet->getCommentStatus($tweet);
+        $response->load('user', 'images');
+
+        return response()->json($response, 200);
+    }
+
     function likeTweet(Tweet $tweet)
     {
         try {
@@ -73,7 +80,7 @@ class TweetController extends Controller
                 ? $tweet->likeUsers()->detach($user_id)
                 : $tweet->likeUsers()->attach($user_id);
 
-            $response = Tweet::latest()->with('user', 'images')->get();
+            $response = Tweet::getAllTweetWithComment();
 
             return response()->json($response, 200);
         } catch (\Exception $e) {
@@ -93,7 +100,7 @@ class TweetController extends Controller
                 ? $tweet->reTweetUsers()->detach($user_id)
                 : $tweet->reTweetUsers()->attach($user_id);
 
-            $response = Tweet::latest()->with('user', 'images')->get();
+            $response = Tweet::getAllTweetWithComment();
 
             return response()->json($response, 200);
         } catch (\Exception $e) {
