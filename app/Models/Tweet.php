@@ -32,6 +32,15 @@ class Tweet extends Model
         return $query->where('comment_to', $id)->latest()->with('user', 'images');
     }
 
+    public static function scopeAllTweetWithComment($query)
+    {
+        $tweets = $query->allTweet()->get();
+
+        return $tweets->each(function ($tweet) {
+            return $tweet->getCommentStatus($tweet);
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -72,15 +81,6 @@ class Tweet extends Model
     {
         $user_id = auth()->id();
         return $this->reTweetUsers()->exists('user_id', $user_id);
-    }
-
-    public static function getAllTweetWithComment()
-    {
-        $tweets = (new self)->allTweet()->get();
-
-        return $tweets->each(function ($tweet) {
-            return (new self)->getCommentStatus($tweet);
-        });
     }
 
     public function getCommentStatus($tweet)

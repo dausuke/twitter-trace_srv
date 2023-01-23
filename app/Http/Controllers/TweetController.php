@@ -11,11 +11,19 @@ use App\Models\Tweet;
 
 class TweetController extends Controller
 {
-    function index()
+    function index(Request $request)
     {
         try {
-            $response = Tweet::getAllTweetWithComment();
-            return response()->json($response, 200);
+            $count = $request->limit ? $request->limit : 20;
+            $paged = $request->paged ? $request->paged : 1;
+            $skip = $count * ($paged - 1);
+
+            $response = Tweet::latest()
+                ->take($count)
+                ->skip($skip)
+                ->allTweetWithComment();
+
+            return response()->json($response);
         } catch (\Exception $e) {
             Logger($e);
             abort(404);
@@ -66,7 +74,7 @@ class TweetController extends Controller
         $response = $tweet->getCommentStatus($tweet);
         $response->load('user', 'images');
 
-        return response()->json($response, 200);
+        return response()->json($response);
     }
 
     function likeTweet(Tweet $tweet)
@@ -80,9 +88,9 @@ class TweetController extends Controller
                 ? $tweet->likeUsers()->detach($user_id)
                 : $tweet->likeUsers()->attach($user_id);
 
-            $response = Tweet::getAllTweetWithComment();
+            $response = Tweet::allTweetWithComment();
 
-            return response()->json($response, 200);
+            return response()->json($response);
         } catch (\Exception $e) {
             Logger($e);
             abort(404);
@@ -100,9 +108,9 @@ class TweetController extends Controller
                 ? $tweet->reTweetUsers()->detach($user_id)
                 : $tweet->reTweetUsers()->attach($user_id);
 
-            $response = Tweet::getAllTweetWithComment();
+            $response = Tweet::allTweetWithComment();
 
-            return response()->json($response, 200);
+            return response()->json($response);
         } catch (\Exception $e) {
             Logger($e);
             abort(404);
