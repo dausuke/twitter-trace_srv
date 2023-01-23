@@ -31,9 +31,9 @@ class AuthController extends Controller
 
             $user = User::create($data);
             $response = $user->toArray();
-            $response['token'] =  $user->createToken($user['email'])->plainTextToken;
+            $response['token'] =  $user->createToken($user['account_name'])->plainTextToken;
 
-            return response()->json($response, 200);
+            return response()->json($response);
         } catch (\Exception $e) {
             Logger($e);
             abort(404);
@@ -52,9 +52,9 @@ class AuthController extends Controller
             $user->load('tweets');
 
             $response = $user->toArray();
-            $response['token'] = $user->createToken($data['email'])->plainTextToken;
+            $response['token'] = $user->createToken($data['account_name'])->plainTextToken;
 
-            return response()->json($response, 200);
+            return response()->json($response);
         }
 
         return response()->json(false, 200);
