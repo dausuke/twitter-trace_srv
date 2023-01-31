@@ -41,6 +41,5 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::post('tweet/create', 'create');
         Route::post('tweet/{tweet}/like',  'likeTweet');
         Route::post('tweet/{tweet}/retweet',  'retweet');
-        Route::post('tweet/{tweet}/comment',  'retweet');
     });
 });
